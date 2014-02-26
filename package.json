@@ -1,7 +1,7 @@
 {
   "name": "demo-store",
   "devDependencies": {
-    "rgulp": "vlipco/rgulp",
+    "rgulp": "vlipco/node-rgulp",
     "gulp-util": "~2.2.14",
     "gulp": "~3.5.2",
     "coffee-script": "~1.7.1",
