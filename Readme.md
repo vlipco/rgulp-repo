@@ -12,8 +12,7 @@ TODO: pending update by DPT!!
 
 ## To develop locally
 
-1. Clone locally.
-2. Make sure you have all the dependencies installed.
+
 3. If you are on osx `brew install pngquant pngcrush` for [assetgraph-builder](https://github.com/assetgraph/assetgraph-builder) for other platforms, check the repo.
 3. Install gulp globally with `npm install gulp -g`
 2. Install the app's repo's dev dependencies for ruby & node with `npm install && bundle`
