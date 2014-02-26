@@ -1,6 +1,6 @@
 gulp = require 'gulp'
 gutil = require 'gulp-util'
-rg = require('../rgulp/rgulp.coffee')(silent: false, root: gutil.env.root)
+rg = require('rgulp')(silent: false, root: gutil.env.root)
 
 process.chdir rg.root
 
