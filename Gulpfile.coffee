@@ -1,5 +1,9 @@
 gulp = require 'gulp'
 gutil = require 'gulp-util'
+rg = require('../rgulp/rgulp.coffee')(silent: false, root: gutil.env.root)
+
+process.chdir rg.root
+
 runSequence = require 'run-sequence'
 
 jade = require 'gulp-jade'
@@ -22,6 +26,8 @@ glob = require 'glob'
 pretty = require 'pretty-bytes'
 server = require 'pushstate-server'
 
+# we determine the targets relative to the root of the project
+# managed by Rgulp
 target = './build/dev'
 minTarget = './build/min'
 distTarget = './build/dist' # CDNized for deployment
@@ -47,6 +53,7 @@ assetsExtensions = "+(svg|eot|ttf|woff|gif|png)"
 
 assetsGlob = "app/**/*.#{assetsExtensions}"
 jadeGlob = 'app/index.jade'
+
 coffeeGlob = ['app/javascripts/*.coffee','!**/_*.coffee']
 sassGlob = ['app/**/*.sass','!**/_*.sass']
 
