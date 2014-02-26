@@ -1,0 +1,26 @@
+{
+  "name": "demo-store",
+  "devDependencies": {
+    "gulp-util": "~2.2.14",
+    "gulp": "~3.5.2",
+    "coffee-script": "~1.7.1",
+    "gulp-jade": "~0.4.2",
+    "gulp-ruby-sass": "~0.3.0",
+    "lazypipe": "~0.2.1",
+    "gulp-coffee": "~1.4.1",
+    "gulp-include": "~0.2.2",
+    "gulp-removelogs": "0.0.2",
+    "gulp-clean": "~0.2.4",
+    "pushstate-server": "~0.2.0",
+    "gulp-if": "0.0.5",
+    "gulp-reduce": "0.0.0",
+    "gulp-using": "0.0.1",
+    "run-sequence": "~0.3.6",
+    "assetgraph-builder": "~1.8.14",
+    "glob": "~3.2.8",
+    "pretty-bytes": "~0.1.0",
+    "gulp-plumber": "~0.5.6"
+  }
+}
+
+
