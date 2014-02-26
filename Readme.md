@@ -43,3 +43,10 @@ Then just run `rgulp -T` to see all the tasks you have available.
 
 This gulpgile accepts --type production/deployment to trigger target specific settings
 
+Potential improvements:
+
+- Plumber to prevent errors
+- Deploy with ansible
+- watch for changes in build & remake compressed version
+- caching
+- receive configuration variables, e.g. CDN url
