@@ -56,24 +56,27 @@ jadeGlob = rg.expand "app/index.jade"
 
 coffeeGlob = [
 	rg.expand('app/javascripts/*.coffee')
-	rg.expand('!**/_*.coffee')
+	rg.expand('app/vendor/*.coffee')
+	"!#{rg.expand('**/_*.coffee')}"
 ]
 
 sassGlob = [
 	rg.expand('app/**/*.sass')
-	rg.expand('!**/_*.sass')
+	"!#{rg.expand('**/_*.sass')}"
 ]
 
 gulp.task 'clean', -> 
-	gulp.src([target,minTarget,distTarget], {read: false}).pipe clean()
+	gulp.src([target,minTarget,distTarget], {read: false}).pipe clean(force: true)
 
 gulp.task 'copy', ->
-	gulp.src(assetsGlob).pipe gulp.dest target
+	gulp.src(assetsGlob)
+		.pipe using()
+		.pipe gulp.dest target
 
 gulp.task 'jade', ->
 	gulp.src jadeGlob
 		.pipe include()
-		.pipe jade()		
+		.pipe jade()
 		.pipe gulp.dest target
 
 gulp.task 'coffee', ->
@@ -86,8 +89,14 @@ gulp.task 'coffee', ->
 
 gulp.task 'sass', ->
 	dest = "#{target}/stylesheets"
+	gutil.log sassGlob
 	gulp.src sassGlob
-		.pipe sass loadPath: ['app/stylesheets', 'app/vendor']	
+		.pipe using()
+		#Stylesheets load path
+		.pipe sass
+			loadPath: [rg.expand('app/stylesheets'), rg.expand('app/vendor')]
+			sourcemap: !shouldCompress()
+			quiet: true
 		.pipe gulp.dest dest
 
 gulp.task 'relocate-cdn-assets', (cb)->

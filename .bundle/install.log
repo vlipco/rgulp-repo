@@ -1,0 +1,5 @@
+# Logfile created on 2014-03-12 01:05:37 -0500 by logger.rb/36483
+I, [2014-03-12T01:05:37.270476 #98187]  INFO -- : 0:  sass (3.2.12) from /Users/francisco/.rvm/gems/ruby-2.0.0-p247/specifications/sass-3.2.12.gemspec
+I, [2014-03-12T01:05:37.271112 #98187]  INFO -- : 0:  bundler (1.5.1) from /Users/francisco/.rvm/gems/ruby-2.0.0-p247/specifications/bundler-1.5.1.gemspec
+I, [2014-03-12T02:43:09.825195 #1570]  INFO -- : 0:  sass (3.3.2) from /Users/francisco/.rvm/gems/ruby-2.0.0-p247/specifications/sass-3.3.2.gemspec
+I, [2014-03-12T02:43:09.826028 #1570]  INFO -- : 0:  bundler (1.5.1) from /Users/francisco/.rvm/gems/ruby-2.0.0-p247/specifications/bundler-1.5.1.gemspec
