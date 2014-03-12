@@ -28,9 +28,9 @@ server = require 'pushstate-server'
 
 # we determine the targets relative to the root of the project
 # managed by Rgulp
-target = './build/dev'
-minTarget = './build/min'
-distTarget = './build/dist' # CDNized for deployment
+target = rg.expand 'build/dev'
+minTarget = rg.expand 'build/min'
+distTarget = rg.expand 'build/dist' # CDNized for deployment
 
 cloudfront = "//lvh.me:3000"
 
@@ -51,11 +51,18 @@ typeTarget = ->
 # considered static by the push state server
 assetsExtensions = "+(svg|eot|ttf|woff|gif|png)"
 
-assetsGlob = "app/**/*.#{assetsExtensions}"
-jadeGlob = 'app/index.jade'
+assetsGlob = rg.expand "app/**/*.#{assetsExtensions}"
+jadeGlob = rg.expand "app/index.jade"
 
-coffeeGlob = ['app/javascripts/*.coffee','!**/_*.coffee']
-sassGlob = ['app/**/*.sass','!**/_*.sass']
+coffeeGlob = [
+	rg.expand('app/javascripts/*.coffee')
+	rg.expand('!**/_*.coffee')
+]
+
+sassGlob = [
+	rg.expand('app/**/*.sass')
+	rg.expand('!**/_*.sass')
+]
 
 gulp.task 'clean', -> 
 	gulp.src([target,minTarget,distTarget], {read: false}).pipe clean()
