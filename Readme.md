@@ -21,7 +21,7 @@ Has been tested with npm v1.4.3 & node v0.10.26
 
 ## Including in a project
 
-Once you have your environment with all dependencies, you simply include an RGfile than must either have js or coffee extension.
+Once you have your environment with all dependencies, you simply include an RGfile.coffee (or RGfile.js) at the root of your project.
 
 This tells Rgulp how to get this repo and apply if to your repo, this is a sample of what it should look like:
 
@@ -32,7 +32,7 @@ module.exports = source: repo_data
 
 It says that the gulp repo to use is this git repo checked out at the master branch.
 
-After adding this, simply run `gulp prepare` in your project and this will:
+After adding this, simply run `rgulp prepare` in your project (this can take some minutes, be patient) and this will:
 
 1. Clone this repo into .rgulp folder
 2. Run the prepare script that install the ruby & node dependencies.
