@@ -10,11 +10,13 @@ jade = require 'gulp-jade'
 sass = require 'gulp-ruby-sass'
 coffee = require 'gulp-coffee'
 include = require 'gulp-include'
+templateCache = require 'gulp-angular-templatecache'
 clean = require 'gulp-clean'
 gulpif = require 'gulp-if'
 using = require 'gulp-using'
 lazypipe = require 'lazypipe'
-
+cson = require 'gulp-cson'
+tap = require 'gulp-tap'
 #watch = require('gulp-watch')
 plumber = require 'gulp-plumber'
 
@@ -25,6 +27,7 @@ removeLogs = require 'gulp-removelogs'
 glob = require 'glob'
 pretty = require 'pretty-bytes'
 server = require 'pushstate-server'
+_ = require 'underscore'
 
 # we determine the targets relative to the root of the project
 # managed by Rgulp
@@ -48,6 +51,7 @@ typeTarget = ->
 		when DEPLOYMENT then distTarget
 		else target
 
+
 # considered static by the push state server
 assetsExtensions = "+(svg|eot|ttf|woff|gif|png)"
 
@@ -55,14 +59,31 @@ assetsGlob = rg.expand "app/**/*.#{assetsExtensions}"
 jadeGlob = rg.expand "app/index.jade"
 
 coffeeGlob = [
-	rg.expand('app/javascripts/*.coffee')
+	rg.expand('app/src/*.coffee')
 	rg.expand('app/vendor/*.coffee')
 	"!#{rg.expand('**/_*.coffee')}"
 ]
-
+dependenciesGlob = [
+	rg.expand('app/vendor/*.js')
+]
 sassGlob = [
 	rg.expand('app/**/*.sass')
 	"!#{rg.expand('**/_*.sass')}"
+]
+csonGlob = [
+	rg.expand('app/data/*.cson')
+	rg.expand('app/data/**/*.cson')
+]
+templateGlob = [
+	rg.expand('app/src/*.jade')
+	rg.expand('app/src/**/*.jade')
+]
+
+template_temps = "#{target}/.tmp/templates"
+
+htmlGlob = [
+	rg.expand("#{template_temps}/*.html")
+	rg.expand("#{template_temps}/**/*.html")
 ]
 
 gulp.task 'clean', -> 
@@ -70,7 +91,6 @@ gulp.task 'clean', ->
 
 gulp.task 'copy', ->
 	gulp.src(assetsGlob)
-		.pipe using()
 		.pipe gulp.dest target
 
 gulp.task 'jade', ->
@@ -80,18 +100,23 @@ gulp.task 'jade', ->
 		.pipe gulp.dest target
 
 gulp.task 'coffee', ->
-	dest = "#{target}/javascripts"
+	dest = "#{target}/js"
 	gulp.src coffeeGlob
-		.pipe include()
-		.pipe coffee sourceMap: !shouldCompress()
+		.pipe include({extensions: "coffee"})
+		.pipe coffee sourceMap: !shouldCompress(), contracts: true
 		.pipe withCompression removeLogs()
 		.pipe gulp.dest dest
 
+gulp.task 'js', ->
+	dest = "#{target}/js"
+	gulp.src dependenciesGlob
+		.pipe include({extensions: "js"})
+		.pipe gulp.dest dest
+	# dest = 
+
 gulp.task 'sass', ->
-	dest = "#{target}/stylesheets"
-	gutil.log sassGlob
+	dest = "#{target}/css"
 	gulp.src sassGlob
-		.pipe using()
 		#Stylesheets load path
 		.pipe sass
 			loadPath: [rg.expand('app/stylesheets'), rg.expand('app/vendor')]
@@ -99,11 +124,37 @@ gulp.task 'sass', ->
 			quiet: true
 		.pipe gulp.dest dest
 
+gulp.task 'cson', ->
+	dest = "#{target}/data"
+	gulp.src csonGlob
+		.pipe cson()
+		.pipe gulp.dest dest
+
+gulp.task 'compile-templates', ->
+	gulp.src templateGlob
+		.pipe jade()
+		.pipe using()
+		.pipe gulp.dest template_temps
+
+gulp.task 'jsfy-templates', ->
+	dest = "#{target}/js"
+
+	gulp.src htmlGlob
+		.pipe templateCache( null ,{standalone: true}, (name)->
+			name.split(".html")[0]
+		)
+		.pipe gulp.dest dest
+
+gulp.task 'inject-templates', (cb) ->
+	runSequence 'compile-templates', 'jsfy-templates', cb
+
+
 gulp.task 'relocate-cdn-assets', (cb)->
 	gutil.log "/static/cdn/* -> /static/*" # overrides asset-graph default
 	defaultFolder = "#{distTarget}/static/cdn"
 	gulp.src("#{defaultFolder}/**/*.*").pipe gulp.dest "#{distTarget}/static"
 	gulp.src("#{defaultFolder}/").pipe clean()
+
 
 gulp.task 'compress', (cb)->
 	common = "--root #{target} --gzip"
@@ -118,7 +169,7 @@ gulp.task 'compress', (cb)->
 	exec cmd, (err, stdout, stderr)-> gutil.log stderr if err ; cb(err)
 		
 gulp.task 'build', ['clean'], (cb)->
-	args = [['jade', 'coffee','sass','copy']]
+	args = [['jade', 'coffee', 'js', 'inject-templates', 'sass', 'copy']]
 	if shouldCompress()
 		args.push 'compress'
 		args.push 'size-diff'
@@ -166,7 +217,9 @@ gulp.task 'start-watchers', ->
 	customWatch assetsGlob, ['copy']
 	customWatch jadeGlob, ['jade']
 	customWatch coffeeGlob, ['coffee']
+	customWatch dependenciesGlob, ['js']
 	customWatch sassGlob, ['sass']
+	customWatch templateGlob, ['inject-templates']
 
 gulp.task 'start-server', ->
 	gutil.log "Serving #{typeTarget()}"
