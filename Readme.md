@@ -45,6 +45,7 @@ This gulpgile accepts --type production/deployment to trigger target specific se
 
 Potential improvements:
 
+- Make the sourcemaps work correctly.
 - Plumber to prevent errors
 - Deploy with ansible
 - watch for changes in build & remake compressed version

@@ -58,18 +58,30 @@ assetsExtensions = "+(svg|eot|ttf|woff|gif|png)"
 assetsGlob = rg.expand "app/**/*.#{assetsExtensions}"
 jadeGlob = rg.expand "app/index.jade"
 
-coffeeGlob = [
+coffeeWatchGlob = [
 	rg.expand('app/src/*.coffee')
+	rg.expand('app/src/**/*.coffee')
 	rg.expand('app/vendor/*.coffee')
-	"!#{rg.expand('**/_*.coffee')}"
 ]
+
+coffeeCompileGlob = [
+	rg.expand('app/src/*.coffee')
+	rg.expand('app/src/**/*.coffee')
+	rg.expand('app/vendor/*.coffee')
+	rg.expand('!**/_*.coffee')
+]
+
 dependenciesGlob = [
 	rg.expand('app/vendor/*.js')
 ]
-sassGlob = [
-	rg.expand('app/**/*.sass')
-	"!#{rg.expand('**/_*.sass')}"
-]
+
+sassWatchGlob = [rg.expand('app/**/*.sass')]
+
+sassCompileGlob = [
+		rg.expand('app/**/*.sass')
+		rg.expand('!**/_*.sass')
+	]
+
 csonGlob = [
 	rg.expand('app/data/*.cson')
 	rg.expand('app/data/**/*.cson')
@@ -101,9 +113,10 @@ gulp.task 'jade', ->
 
 gulp.task 'coffee', ->
 	dest = "#{target}/js"
-	gulp.src coffeeGlob
+	gulp.src coffeeCompileGlob
 		.pipe include({extensions: "coffee"})
-		.pipe coffee sourceMap: !shouldCompress(), contracts: true
+		.pipe coffee()
+		# .pipe coffee({sourceMap: !shouldCompress()})
 		.pipe withCompression removeLogs()
 		.pipe gulp.dest dest
 
@@ -116,11 +129,11 @@ gulp.task 'js', ->
 
 gulp.task 'sass', ->
 	dest = "#{target}/css"
-	gulp.src sassGlob
+	gulp.src sassCompileGlob
 		#Stylesheets load path
 		.pipe sass
 			loadPath: [rg.expand('app/stylesheets'), rg.expand('app/vendor')]
-			sourcemap: !shouldCompress()
+			# sourcemap: !shouldCompress()
 			quiet: true
 		.pipe gulp.dest dest
 
@@ -133,7 +146,6 @@ gulp.task 'cson', ->
 gulp.task 'compile-templates', ->
 	gulp.src templateGlob
 		.pipe jade()
-		.pipe using()
 		.pipe gulp.dest template_temps
 
 gulp.task 'jsfy-templates', ->
@@ -216,9 +228,9 @@ gulp.task 'start-watchers', ->
 	gutil.log "Creating watchers, be patient."
 	customWatch assetsGlob, ['copy']
 	customWatch jadeGlob, ['jade']
-	customWatch coffeeGlob, ['coffee']
+	customWatch coffeeWatchGlob, ['coffee']
 	customWatch dependenciesGlob, ['js']
-	customWatch sassGlob, ['sass']
+	customWatch sassWatchGlob, ['sass']
 	customWatch templateGlob, ['inject-templates']
 
 gulp.task 'start-server', ->
