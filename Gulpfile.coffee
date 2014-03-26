@@ -19,7 +19,6 @@ cson = require 'gulp-cson'
 tap = require 'gulp-tap'
 #watch = require('gulp-watch')
 plumber = require 'gulp-plumber'
-
 reduce = require 'gulp-reduce'
 
 removeLogs = require 'gulp-removelogs'
@@ -28,6 +27,8 @@ glob = require 'glob'
 pretty = require 'pretty-bytes'
 server = require 'pushstate-server'
 _ = require 'underscore'
+
+karma = require 'gulp-karma'
 
 # we determine the targets relative to the root of the project
 # managed by Rgulp
@@ -63,7 +64,6 @@ coffeeWatchGlob = [
 	rg.expand('app/src/**/*.coffee')
 	rg.expand('app/vendor/*.coffee')
 ]
-
 coffeeCompileGlob = [
 	rg.expand('app/src/*.coffee')
 	rg.expand('app/src/**/*.coffee')
@@ -71,12 +71,20 @@ coffeeCompileGlob = [
 	rg.expand('!**/_*.coffee')
 ]
 
+coffeeTestCompileGlob = [
+	rg.expand('test/*.coffee')
+	rg.expand('test/**/*.coffee')
+	rg.expand('!**/_*.coffee')
+]
+
 dependenciesGlob = [
 	rg.expand('app/vendor/*.js')
 ]
+testDependenciesGlob=[
+	rg.expand('test/vendor/*.js')
+]
 
 sassWatchGlob = [rg.expand('app/**/*.sass')]
-
 sassCompileGlob = [
 		rg.expand('app/**/*.sass')
 		rg.expand('!**/_*.sass')
@@ -86,17 +94,30 @@ csonGlob = [
 	rg.expand('app/data/*.cson')
 	rg.expand('app/data/**/*.cson')
 ]
+
 templateGlob = [
 	rg.expand('app/src/*.jade')
 	rg.expand('app/src/**/*.jade')
 ]
 
 template_temps = "#{target}/.tmp/templates"
-
 htmlGlob = [
 	rg.expand("#{template_temps}/*.html")
 	rg.expand("#{template_temps}/**/*.html")
 ]
+
+test_temps = "#{target}/test"
+compiledTestGlob = [
+	rg.expand("#{test_temps}/**/*.js")
+]
+
+completeTestGlob = _.union [
+		rg.expand("#{target}/js/dependencies.js")
+		rg.expand("#{target}/js/templates.js")
+		rg.expand("#{target}/js/app.js")
+		rg.expand("#{target}/test/test_dependencies.js")
+	]
+	,compiledTestGlob
 
 gulp.task 'clean', -> 
 	gulp.src([target,minTarget,distTarget], {read: false}).pipe clean(force: true)
@@ -120,12 +141,19 @@ gulp.task 'coffee', ->
 		.pipe withCompression removeLogs()
 		.pipe gulp.dest dest
 
+
 gulp.task 'js', ->
 	dest = "#{target}/js"
 	gulp.src dependenciesGlob
 		.pipe include({extensions: "js"})
 		.pipe gulp.dest dest
-	# dest = 
+	# dest =
+
+gulp.task 'js-test', ->
+	dest = "#{target}/test"
+	gulp.src testDependenciesGlob
+		.pipe include({extensions: "js"})
+		.pipe gulp.dest dest
 
 gulp.task 'sass', ->
 	dest = "#{target}/css"
@@ -160,7 +188,31 @@ gulp.task 'jsfy-templates', ->
 gulp.task 'inject-templates', (cb) ->
 	runSequence 'compile-templates', 'jsfy-templates', cb
 
+###
+TESTING
+###
+gulp.task 'coffee-test', ->
+	dest = "#{target}/test"
+	gulp.src coffeeTestCompileGlob
+		.pipe include({extensions: "coffee"})
+		.pipe coffee()
+		# .pipe coffee({sourceMap: !shouldCompress()})
+		.pipe withCompression removeLogs()
+		.pipe gulp.dest dest
 
+
+gulp.task 'karma-watch', ->
+	gulp.src completeTestGlob
+		.pipe karma( configFile: '../test/karma.conf.coffee', action: "watch")
+		#The watch function is managed by the gulp watchers.
+gulp.task 'karma', ->
+	gulp.src completeTestGlob
+		.pipe karma( configFile: '../test/karma.conf.coffee', action: "run")
+		#The watch function is managed by the gulp watchers.
+
+
+###
+###
 gulp.task 'relocate-cdn-assets', (cb)->
 	gutil.log "/static/cdn/* -> /static/*" # overrides asset-graph default
 	defaultFolder = "#{distTarget}/static/cdn"
@@ -170,13 +222,16 @@ gulp.task 'relocate-cdn-assets', (cb)->
 
 gulp.task 'compress', (cb)->
 	common = "--root #{target} --gzip"
+	console.log "common: ", common
 	if isDeployment()
 		gutil.log "Using #{cloudfront} as CDN"
 		options = "#{common} --outroot #{distTarget} --cdnroot #{cloudfront}/static"	
 	else
-		options = "#{common} --outroot #{minTarget}"	
+		options = "#{common} --outroot #{minTarget}"
+		console.log "options:", options
 
 	cmd = "buildProduction #{options} #{target}/index.html"
+	console.log "cmd:", cmd
 	exec = require('child_process').exec
 	exec cmd, (err, stdout, stderr)-> gutil.log stderr if err ; cb(err)
 		
@@ -232,6 +287,7 @@ gulp.task 'start-watchers', ->
 	customWatch dependenciesGlob, ['js']
 	customWatch sassWatchGlob, ['sass']
 	customWatch templateGlob, ['inject-templates']
+	customWatch coffeeTestCompileGlob, ['coffee-test']
 
 gulp.task 'start-server', ->
 	gutil.log "Serving #{typeTarget()}"
@@ -239,4 +295,7 @@ gulp.task 'start-server', ->
 	server.start port: 3000, directory: typeTarget()
 
 gulp.task 'dev', (cb)->
-	runSequence 'build', ['start-server','start-watchers'], cb
+	runSequence 'build', ['test', 'start-server','start-watchers'], cb
+
+gulp.task 'test', (cb)->
+	runSequence 'coffee-test', 'js-test', ['karma-watch'], cb

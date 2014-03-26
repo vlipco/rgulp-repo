@@ -24,6 +24,11 @@
     "gulp-cson": "0.0.1",
     "gulp-angular-templatecache": "fpinzn/gulp-angular-templatecache",
     "gulp-tap": "^0.1.1",
-    "underscore": "^1.6.0"
+    "underscore": "^1.6.0",
+    "karma": "^0.12.1",
+    "gulp-karma": "0.0.4",
+    "karma-chrome-launcher": "^0.1.2",
+    "karma-jasmine": "^0.1.5",
+    "karma-growl-reporter": "^0.1.1"
   }
 }
