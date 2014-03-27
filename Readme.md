@@ -51,3 +51,7 @@ Potential improvements:
 - watch for changes in build & remake compressed version
 - caching
 - receive configuration variables, e.g. CDN url
+
+The NVM_DIR ENV variable is needed to run.
+
+Selenium standalone server downloaded from: http://selenium-release.storage.googleapis.com/index.html?path=2.40/ into `test/vendor`

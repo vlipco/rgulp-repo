@@ -1,5 +1,5 @@
 {
-  "name": "demo-store",
+  "name": "checkout-frontend",
   "devDependencies": {
     "rgulp": "0.1.x",
     "gulp-util": "~2.2.14",
@@ -8,7 +8,6 @@
     "gulp-jade": "~0.4.2",
     "gulp-ruby-sass": "~0.3.0",
     "lazypipe": "~0.2.1",
-    "gulp-coffee": "fpinzn/gulp-coffee",
     "gulp-include": "~0.2.2",
     "gulp-removelogs": "0.0.2",
     "gulp-clean": "~0.2.4",
@@ -29,6 +28,10 @@
     "gulp-karma": "0.0.4",
     "karma-chrome-launcher": "^0.1.2",
     "karma-jasmine": "^0.1.5",
-    "karma-growl-reporter": "^0.1.1"
+    "karma-osx-reporter": "0.0.4",
+    "gulp-livescript": "^0.2.1",
+    "gulp-protractor": "0.0.7",
+    "protractor": "^0.20.1",
+    "gulp-coffee": "^1.4.1"
   }
 }

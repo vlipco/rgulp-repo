@@ -9,6 +9,7 @@ runSequence = require 'run-sequence'
 jade = require 'gulp-jade'
 sass = require 'gulp-ruby-sass'
 coffee = require 'gulp-coffee'
+liveScript = require('gulp-livescript')
 include = require 'gulp-include'
 templateCache = require 'gulp-angular-templatecache'
 clean = require 'gulp-clean'
@@ -29,7 +30,7 @@ server = require 'pushstate-server'
 _ = require 'underscore'
 
 karma = require 'gulp-karma'
-
+protractor = require 'gulp-protractor'
 # we determine the targets relative to the root of the project
 # managed by Rgulp
 target = rg.expand 'build/dev'
@@ -67,14 +68,17 @@ coffeeWatchGlob = [
 coffeeCompileGlob = [
 	rg.expand('app/src/*.coffee')
 	rg.expand('app/src/**/*.coffee')
-	rg.expand('app/vendor/*.coffee')
-	rg.expand('!**/_*.coffee')
+	"!#{rg.expand('!**/_*.coffee')}"
 ]
 
 coffeeTestCompileGlob = [
-	rg.expand('test/*.coffee')
-	rg.expand('test/**/*.coffee')
-	rg.expand('!**/_*.coffee')
+	rg.expand('test/spec/*.coffee')
+	rg.expand('test/spec/**/*.coffee')
+]
+
+coffeeE2ETestCompileGlob = [
+	rg.expand('test/e2e/*.coffee')
+	rg.expand('test/e2e/**/*.coffee')
 ]
 
 dependenciesGlob = [
@@ -87,7 +91,7 @@ testDependenciesGlob=[
 sassWatchGlob = [rg.expand('app/**/*.sass')]
 sassCompileGlob = [
 		rg.expand('app/**/*.sass')
-		rg.expand('!**/_*.sass')
+		"!#{rg.expand('!**/_*.sass')}"
 	]
 
 csonGlob = [
@@ -107,6 +111,7 @@ htmlGlob = [
 ]
 
 test_temps = "#{target}/test"
+
 compiledTestGlob = [
 	rg.expand("#{test_temps}/**/*.js")
 ]
@@ -203,13 +208,16 @@ gulp.task 'coffee-test', ->
 
 gulp.task 'karma-watch', ->
 	gulp.src completeTestGlob
-		.pipe karma( configFile: '../test/karma.conf.coffee', action: "watch")
+		.pipe karma( configFile: '../test/config/karma.conf.coffee', action: "watch")
 		#The watch function is managed by the gulp watchers.
 gulp.task 'karma', ->
 	gulp.src completeTestGlob
-		.pipe karma( configFile: '../test/karma.conf.coffee', action: "run")
+		.pipe karma( configFile: '../test/config/karma.conf.coffee', action: "run")
 		#The watch function is managed by the gulp watchers.
 
+gulp.task 'protractor', ->
+	gulp.src coffeeE2ETestCompileGlob
+		.pipe protractor.protractor(configFile: '../test/config/protractor.conf.coffee')
 
 ###
 ###
@@ -288,6 +296,7 @@ gulp.task 'start-watchers', ->
 	customWatch sassWatchGlob, ['sass']
 	customWatch templateGlob, ['inject-templates']
 	customWatch coffeeTestCompileGlob, ['coffee-test']
+	customWatch coffeeE2ETestCompileGlob, ['protractor']
 
 gulp.task 'start-server', ->
 	gutil.log "Serving #{typeTarget()}"
@@ -298,4 +307,4 @@ gulp.task 'dev', (cb)->
 	runSequence 'build', ['test', 'start-server','start-watchers'], cb
 
 gulp.task 'test', (cb)->
-	runSequence 'coffee-test', 'js-test', ['karma-watch'], cb
+	runSequence 'coffee-test', 'js-test', ['karma-watch', 'protractor'], cb
