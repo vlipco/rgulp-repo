@@ -295,7 +295,7 @@ gulp.task 'start-watchers', ->
 	customWatch sassWatchGlob, ['sass']
 	customWatch templateGlob, ['inject-templates']
 	customWatch coffeeTestCompileGlob, ['coffee-test']
-	customWatch coffeeE2ETestCompileGlob, ['e2e']
+	# customWatch coffeeE2ETestCompileGlob, ['e2e']
 
 gulp.task 'start-server', ->
 	gutil.log "Serving #{typeTarget()}"
