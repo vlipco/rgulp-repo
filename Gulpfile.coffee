@@ -303,7 +303,7 @@ gulp.task 'start-server', ->
 	server.start port: 3000, directory: typeTarget()
 
 gulp.task 'dev', (cb)->
-	runSequence 'build', ['test', 'start-server','start-watchers'], cb
+	runSequence 'build', ['start-server','start-watchers'], cb
 
 gulp.task 'test', (cb)->
 	runSequence 'coffee-test', 'js-test', ['karma-watch'], cb
