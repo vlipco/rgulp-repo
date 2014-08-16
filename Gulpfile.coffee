@@ -28,8 +28,8 @@ pretty = require 'pretty-bytes'
 server = require 'pushstate-server'
 _ = require 'underscore'
 
-karma = require 'gulp-karma'
-protractor = require 'gulp-protractor'
+#karma = require 'gulp-karma'
+#protractor = require 'gulp-protractor'
 # we determine the targets relative to the root of the project
 # managed by Rgulp
 target = rg.expand 'build/dev'
@@ -305,5 +305,5 @@ gulp.task 'start-server', ->
 gulp.task 'dev', (cb)->
 	runSequence 'build', ['start-server','start-watchers'], cb
 
-gulp.task 'test', (cb)->
-	runSequence 'coffee-test', 'js-test', ['karma-watch'], cb
+#gulp.task 'test', (cb)->
+#	runSequence 'coffee-test', 'js-test', ['karma-watch'], cb
